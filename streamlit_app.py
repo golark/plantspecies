@@ -2,8 +2,11 @@ import streamlit as st
 from fastai.vision.all import load_learner, PILImage
 from PIL import Image
 import numpy as np
-import openai
+from openai import OpenAI
 import os
+
+
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 # Title and description
 st.title("Plant Species Detector")
@@ -31,21 +34,18 @@ if uploaded_file is not None:
     st.info(f"Confidence: {probs.max():.2f}")
 
     # LLM integration for plant care tips
-    openai.api_key = os.getenv("OPENAI_API_KEY")
-    if openai.api_key:
-        prompt = f"Provide detailed care tips for a plant of the following species: {pred}. Include watering, sunlight, soil, and any special care instructions."
-        try:
-            response = openai.ChatCompletion.create(
-                model="gpt-3.5-turbo",
-                messages=[
-                    {"role": "system", "content": "You are a helpful gardening assistant."},
-                    {"role": "user", "content": prompt}
-                ]
-            )
-            tips = response.choices[0].message.content.strip()
-            st.subheader("Plant Care Tips")
-            st.write(tips)
-        except Exception as e:
-            st.warning(f"Could not fetch care tips: {e}")
-    else:
+    prompt = f"Provide detailed care tips for a plant of the following species: {pred}. Include watering, sunlight, soil, and any special care instructions."
+    try:
+        response = client.chat.completions.create(
+            model="gpt-3.5-turbo",
+            messages=[
+                {"role": "system", "content": "You are a helpful gardening assistant."},
+                {"role": "user", "content": prompt}
+            ]
+        )
+        tips = response.choices[0].message.content.strip()
+        st.subheader("Plant Care Tips")
+        st.write(tips)
+    except Exception as e:
+        st.warning(f"Could not fetch care tips: {e}")
         st.info("Set the OPENAI_API_KEY environment variable to get plant care tips.") 
