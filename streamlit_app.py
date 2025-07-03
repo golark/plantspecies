@@ -2,22 +2,20 @@ import streamlit as st
 from fastai.vision.all import load_learner, PILImage
 from PIL import Image
 import numpy as np
-from openai import OpenAI
 import os
-
-
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+from plant_tips import PlantTipsGenerator
 
 # Title and description
 st.title("Plant Species Detector")
 st.write("Upload an image of a plant to determine its species.")
 
-# Load the model (cache to avoid reloading on every run)
+# Load the plant classification model (cache to avoid reloading on every run)
 @st.cache_resource
 def load_model():
     return load_learner('plant_species_model.pkl')
 
 model = load_model()
+tips_generator = PlantTipsGenerator()
 
 # File uploader
 uploaded_file = st.file_uploader("Choose a plant image...", type=["jpg", "jpeg", "png"])
@@ -33,19 +31,11 @@ if uploaded_file is not None:
     st.success(f"Species: {pred}")
     st.info(f"Confidence: {probs.max():.2f}")
 
-    # LLM integration for plant care tips
-    prompt = f"Provide detailed care tips for a plant of the following species: {pred}. Include watering, sunlight, soil, and any special care instructions."
     try:
-        response = client.chat.completions.create(
-            model="gpt-3.5-turbo",
-            messages=[
-                {"role": "system", "content": "You are a helpful gardening assistant."},
-                {"role": "user", "content": prompt}
-            ]
-        )
-        tips = response.choices[0].message.content.strip()
-        st.subheader("Plant Care Tips")
+        with st.spinner("Fetching care tips from Gemini..."):
+            tips = tips_generator.generate_gemini_tips(str(pred))
+        st.subheader("Plant Care Tips (Gemini)")
         st.write(tips)
     except Exception as e:
-        st.warning(f"Could not fetch care tips: {e}")
-        st.info("Set the OPENAI_API_KEY environment variable to get plant care tips.") 
+        st.warning(f"Could not generate care tips from Gemini: {e}")
+        st.info("Make sure the GEMINI_API_KEY environment variable is set and valid.") 
