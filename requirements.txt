@@ -4,3 +4,8 @@ pillow
 numpy
 requests
 llama-cpp-python
+chromadb
+google-generativeai
+sentence-transformers
+langchain
+langchain-google-genai

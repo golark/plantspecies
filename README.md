@@ -12,16 +12,20 @@ license: apache-2.0
 
 Check out the configuration reference at https://huggingface.co/docs/hub/spaces-config-reference
 
-# Plant Species Detector
+# Plant Species Detector & Care Assistant
 
-A machine learning application that detects plant species from uploaded images using a trained fastai model.
+A machine learning application that detects plant species from uploaded images using a trained fastai model, enhanced with **RAG (Retrieval-Augmented Generation)** for intelligent plant care recommendations.
 
 ## Features
 
 - Upload plant images (JPG, JPEG, PNG)
 - Real-time plant species detection
 - Confidence score display
-- User-friendly web interface
+- **RAG-enhanced plant care tips** using ChromaDB vector database
+- **Interactive care questions** - ask specific plant care questions
+- **Dual search modes** - upload images OR search by plant name
+- **Semantic search** for similar plants and care information
+- User-friendly web interface with modern UI
 
 ## Local Development
 
